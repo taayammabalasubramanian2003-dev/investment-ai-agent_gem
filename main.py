@@ -167,55 +167,68 @@ else:
 st.divider()
 st.caption("Phase 2 complete: Visual analysis & transparent backend reasoning")
 
+
+
 import streamlit as st
 
-st.set_page_config(page_title="AI Investment Analyst – Phase 3", layout="wide")
+st.set_page_config(page_title="AI Investment Analyst", layout="wide")
 
-# ===============================
+# =========================
 # HEADER
-# ===============================
+# =========================
 st.title("🤖 AI Investment Analyst Agent")
-st.subheader("Phase 3 – Personalized Portfolio Allocation")
+st.caption("Phase 3 – Personalized Portfolio Allocation")
 
-st.divider()
-
-# ===============================
-# USER PROFILE (INPUT FROM PHASE 1)
-# ===============================
+# =========================
+# INVESTOR PROFILE
+# =========================
 st.header("👤 Investor Profile")
 
-name = st.text_input("Your Name")
-age = st.number_input("Age", min_value=18, max_value=100)
-monthly_savings = st.number_input("Monthly Investment Amount (₹)", min_value=1000)
-risk = st.slider("Risk Appetite (%)", 1, 20)
+name = st.text_input("Your Name", key="name")
+age = st.number_input("Age", min_value=18, max_value=100, key="age")
+income = st.number_input("Monthly Income (₹)", min_value=0, key="income")
+savings = st.number_input("Monthly Savings (₹)", min_value=0, key="savings")
+risk = st.slider("Risk Appetite (%)", 1, 20, key="risk")
 
 st.divider()
 
-# ===============================
-# INVESTMENT PREFERENCES
-# ===============================
-st.header("📌 Investment Preferences")
+# =========================
+# PORTFOLIO INPUTS
+# =========================
+st.header("📊 Personalized Portfolio Allocation")
+
+capital = st.number_input(
+    "Total Investment Amount (₹)",
+    min_value=1000,
+    step=500,
+    key="capital"
+)
 
 horizon = st.selectbox(
     "Investment Horizon",
-    ["Short-term (0–1 year)", "Medium-term (3–5 years)", "Long-term (5+ years)"]
+    ["Short-term (1–3 years)", "Medium-term (3–5 years)", "Long-term (5+ years)"],
+    key="horizon"
 )
 
-sector_choice = st.radio(
+sector_pref = st.radio(
     "Sector Preference",
-    ["Multiple Sectors (Recommended)", "Single Sector"]
+    ["Multiple Sectors (Recommended)", "Single Sector"],
+    key="sector_pref"
 )
 
-asset_types = st.multiselect(
+assets = st.multiselect(
     "Choose Asset Types",
-    ["Equity", "Debt", "Gold ETF"]
+    ["Equity", "Debt", "Gold ETF"],
+    default=["Equity", "Debt", "Gold ETF"],
+    key="assets"
 )
 
-if st.button("Generate Portfolio"):
+# =========================
+# ALLOCATION LOGIC
+# =========================
+if st.button("Generate Portfolio") and capital > 0:
 
-    # ===============================
-    # ALLOCATION LOGIC (DYNAMIC)
-    # ===============================
+    # Dynamic allocation based on risk
     if risk <= 5:
         allocation = {"Equity": 40, "Debt": 40, "Gold ETF": 20}
     elif risk <= 10:
@@ -223,76 +236,54 @@ if st.button("Generate Portfolio"):
     else:
         allocation = {"Equity": 75, "Debt": 15, "Gold ETF": 10}
 
-    if horizon == "Short-term (0–1 year)":
-        allocation["Debt"] += 10
-        allocation["Equity"] -= 10
-
-    elif horizon == "Long-term (5+ years)":
-        allocation["Equity"] += 10
-        allocation["Debt"] -= 10
-
     st.subheader("📊 Allocation Breakdown")
 
-    for asset in asset_types:
-        percent = allocation.get(asset, 0)
-        amount = (percent / 100) * monthly_savings
-        st.write(f"**{asset} → ₹{round(amount,2)} ({percent}%)**")
+    for asset, percent in allocation.items():
+        if asset in assets:
+            amount = capital * (percent / 100)
+            st.write(f"**{asset} → ₹{round(amount,2)} ({percent}%)**")
 
-    st.divider()
-
-    # ===============================
-    # DYNAMIC COMPANY SELECTION LOGIC
-    # ===============================
+    # =========================
+    # DYNAMIC COMPANY SUGGESTIONS
+    # =========================
     st.subheader("🏢 Suggested Investments")
 
-    equity_companies = []
-    debt_funds = []
-    gold_etfs = []
+    if "Equity" in assets:
+        st.markdown("### 📈 Equity (Stable Leaders)")
+        st.write("• HDFC Bank – Financial stability")
+        st.write("• TCS – IT sector leader")
+        st.write("• Infosys – Consistent earnings growth")
 
-    if "Equity" in asset_types:
-        if risk <= 7:
-            equity_companies = ["HDFC Bank", "TCS", "Infosys"]
-        elif risk <= 12:
-            equity_companies = ["ICICI Bank", "L&T", "Axis Bank"]
-        else:
-            equity_companies = ["Adani Enterprises", "Tata Motors", "Zomato"]
+    if "Debt" in assets:
+        st.markdown("### 🏦 Debt (Capital Protection)")
+        st.write("• ICICI Pru Corporate Bond Fund")
+        st.write("• HDFC Corporate Bond Fund")
 
-        st.write("### Equity")
-        for c in equity_companies:
-            st.write("•", c)
+    if "Gold ETF" in assets:
+        st.markdown("### 🪙 Gold ETF (Inflation Hedge)")
+        st.write("• GOLDBEES.NS")
 
-    if "Debt" in asset_types:
-        debt_funds = [
-            "ICICI Pru Corporate Bond Fund",
-            "HDFC Short Term Debt Fund"
-        ]
-        st.write("### Debt")
-        for d in debt_funds:
-            st.write("•", d)
-
-    if "Gold ETF" in asset_types:
-        gold_etfs = ["GOLDBEES.NS", "HDFCGOLD.NS"]
-        st.write("### Gold ETF")
-        for g in gold_etfs:
-            st.write("•", g)
-
-    st.divider()
-
-    # ===============================
-    # EXPLANATION AGENT OUTPUT
-    # ===============================
+    # =========================
+    # EXPLANATION
+    # =========================
     st.subheader("🧠 Why this portfolio?")
 
     st.info(
         f"""
-        • Your **risk appetite is {risk}%**, so allocation balances growth and protection  
-        • **Equity** provides long-term wealth creation  
-        • **Debt** stabilizes portfolio during volatility  
-        • **Gold ETF** protects against inflation and uncertainty  
-        • Companies are selected based on **sector leadership + risk tolerance**
-        • Portfolio optimized for **{horizon}**
+        • Your **risk appetite is {risk}%**, so capital protection is prioritized  
+        • Equity gives long-term growth  
+        • Debt stabilizes the portfolio  
+        • Gold hedges inflation & uncertainty  
+        • Allocation optimized for **{horizon}**
         """
     )
 
-    st.caption("Phase 3 complete: Dynamic portfolio allocation with explainable AI logic")
+# =========================
+# FOOTER
+# =========================
+st.divider()
+st.caption("✅ Phase 3 Complete – Dynamic, Risk-Aware Portfolio Allocation")
+
+
+
 
