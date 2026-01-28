@@ -202,14 +202,56 @@ else:
 
         st.subheader("🏢 Suggested Investments")
 
+        # =========================
+        # EQUITY
+        # =========================
         if "Equity" in assets:
-            st.write("📈 **Equity:** HDFC Bank, TCS, Infosys")
-
+            st.markdown("### 📈 Equity – Growth Engine")
+        
+            st.write(
+                "✔ **Why Equity?** Equity helps your money grow faster over the long term by investing in businesses."
+            )
+        
+            st.write(
+                "• **HDFC Bank** – India’s largest private bank with stable profits and strong risk management."
+            )
+            st.write(
+                "• **TCS** – Market leader in IT services with consistent revenue and global clients."
+            )
+            st.write(
+                "• **Infosys** – Strong digital transformation focus and steady long-term growth."
+            )
+        
+        # =========================
+        # DEBT
+        # =========================
         if "Debt" in assets:
-            st.write("🏦 **Debt:** ICICI Pru Bond Fund, HDFC Corporate Bond")
-
+            st.markdown("### 🏦 Debt – Capital Protection")
+        
+            st.write(
+                "✔ **Why Debt?** Debt funds protect your capital and reduce overall portfolio risk."
+            )
+        
+            st.write(
+                "• **ICICI Pru Corporate Bond Fund** – Invests in high-quality corporate bonds for stable returns."
+            )
+            st.write(
+                "• **HDFC Corporate Bond Fund** – Lower volatility with predictable income."
+            )
+        
+        # =========================
+        # GOLD ETF
+        # =========================
         if "Gold ETF" in assets:
-            st.write("🪙 **Gold ETF:** GOLDBEES.NS")
+            st.markdown("### 🪙 Gold ETF – Risk Hedge")
+        
+            st.write(
+                "✔ **Why Gold?** Gold protects against inflation, market crashes, and global uncertainty."
+            )
+        
+            st.write(
+                "• **GOLDBEES.NS** – Safest and most liquid gold ETF in India, tracks gold prices directly."
+            )
 
         st.subheader("🧠 Why this portfolio?")
         st.info(
