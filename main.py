@@ -167,3 +167,70 @@ else:
 st.divider()
 st.caption("Phase 2 complete: Visual analysis & transparent backend reasoning")
 
+
+# =========================
+# PHASE 3: PORTFOLIO ALLOCATION
+# =========================
+
+if choice == "Portfolio Allocation":
+    st.header("💼 Personalized Portfolio Allocation")
+
+    capital = st.number_input("Total Investment Amount (₹)", min_value=1000, step=1000)
+    horizon = st.selectbox(
+        "Investment Horizon",
+        ["Short-term (1–2 years)", "Medium-term (3–5 years)", "Long-term (5+ years)"]
+    )
+
+    sector_pref = st.radio(
+        "Sector Preference",
+        ["Multiple Sectors (Recommended)", "Single Sector"]
+    )
+
+    asset_types = st.multiselect(
+        "Choose Asset Types",
+        ["Equity", "Debt", "Gold ETF", "ETF"],
+        default=["Equity", "Debt", "Gold ETF"]
+    )
+
+    if st.button("Generate Portfolio") and capital > 0:
+
+        # -------- Allocation Logic --------
+        if risk <= 5:
+            allocation = {"Equity": 40, "Debt": 40, "Gold ETF": 20}
+        elif risk <= 10:
+            allocation = {"Equity": 60, "Debt": 25, "Gold ETF": 15}
+        else:
+            allocation = {"Equity": 75, "Debt": 15, "Gold ETF": 10}
+
+        st.subheader("📊 Allocation Breakdown")
+
+        for asset, percent in allocation.items():
+            if asset in asset_types:
+                amount = capital * percent / 100
+                st.write(f"**{asset}** → ₹{round(amount,2)} ({percent}%)")
+
+        # -------- Company Suggestions --------
+        st.subheader("🏢 Suggested Investments")
+
+        suggestions = {
+            "Equity": ["HDFC Bank", "TCS", "Infosys"],
+            "Debt": ["ICICI Pru Bond Fund", "HDFC Corporate Bond"],
+            "Gold ETF": ["GOLDBEES.NS"],
+            "ETF": ["NIFTYBEES.NS"]
+        }
+
+        for asset in asset_types:
+            st.write(f"**{asset}:**")
+            for item in suggestions.get(asset, []):
+                st.write("•", item)
+
+        # -------- Explanation --------
+        st.info(
+            f"""
+            🧠 **Why this portfolio?**
+            - Your risk appetite is **{risk}%**, so capital protection is prioritized.
+            - Equity provides growth, Debt provides stability.
+            - Gold hedges inflation and market uncertainty.
+            - Allocation is optimized for **{horizon}**.
+            """
+        )
