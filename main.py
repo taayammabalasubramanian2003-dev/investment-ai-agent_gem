@@ -116,19 +116,34 @@ if choice == "Analyze a Stock":
         # =========================
         # FUNDAMENTAL ANALYSIS
         # =========================
+        # =========================
+        # FUNDAMENTAL ANALYSIS
+        # =========================
         st.header("🏦 Fundamental Analysis")
-
-        info = stock.info
-        st.write("**Sector:**", info.get("sector"))
-        st.write("**P/E Ratio:**", info.get("trailingPE"))
-        st.write("**EPS:**", info.get("trailingEps"))
-        st.write("**Market Cap:**", info.get("marketCap"))
-
-        st.info(
-            "This analysis combines technical indicators (price, RSI, MACD) "
-            "with company fundamentals to help you understand both market behavior "
-            "and company strength."
-        )
+        
+        try:
+            info = stock.get_info()
+        
+            sector = info.get("sector", "N/A")
+            pe = info.get("trailingPE", "N/A")
+            eps = info.get("trailingEps", "N/A")
+            market_cap = info.get("marketCap", "N/A")
+        
+            st.write("**Sector:**", sector)
+            st.write("**P/E Ratio:**", pe)
+            st.write("**EPS:**", eps)
+            st.write("**Market Cap:**", market_cap)
+        
+            st.info(
+                "Fundamental data fetched from free Yahoo Finance API. "
+                "Values may be delayed or limited."
+            )
+        
+        except Exception:
+            st.warning(
+                "⚠️ Fundamental data temporarily unavailable due to free API limits.\n\n"
+                "This does NOT affect technical analysis or investment logic."
+            )
 
 # =========================
 # PORTFOLIO ALLOCATION (PREVIEW)
