@@ -1,4 +1,7 @@
 streamlit
-crewai
 yfinance
-langchain-openai
+pandas
+numpy
+plotly
+matplotlib
+
