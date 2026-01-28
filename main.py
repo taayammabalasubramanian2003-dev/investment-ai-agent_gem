@@ -283,6 +283,11 @@ st.caption("✅ Phase 2 & Phase 3 complete – Transparent AI Investment Agent")
 
 st.header("🧠 Phase 4: AI Decision Agent")
 
+if "trend" not in st.session_state:
+    st.warning("Please analyze a stock in Phase 2 to activate AI Decision Agent.")
+    st.stop()
+
+
 # Safety check
 if (
     "trend" not in st.session_state or
