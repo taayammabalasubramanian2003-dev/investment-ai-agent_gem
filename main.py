@@ -271,122 +271,54 @@ st.divider()
 st.caption("✅ Phase 2 & Phase 3 complete – Transparent AI Investment Agent")
 
 
-# =========================
-# PHASE 4 – PORTFOLIO MONITORING
-# =========================
+st.header("🧠 AI Decision Agent")
 
-st.divider()
-st.header("📈 Phase 4: Portfolio Performance & Guidance")
+score = 0
+if trend == "BULLISH":
+    score += 1
+if rsi_value > 50:
+    score += 1
+if macd_signal == "BULLISH":
+    score += 1
 
-st.caption("This phase helps you track performance, understand risks, and learn better investing.")
-
-# Ensure portfolio exists
-if "capital" in st.session_state and st.session_state.capital > 0:
-
-    st.subheader("📊 Portfolio Performance (Simulated)")
-
-    # Simulated monthly return (replace with real API later)
-    monthly_return = np.random.uniform(-4, 8)
-
-    current_value = st.session_state.capital * (1 + monthly_return / 100)
-    profit_loss = current_value - st.session_state.capital
-
-    st.metric(
-        label="📈 Portfolio Monthly Change",
-        value=f"{round(monthly_return,2)}%",
-        delta=f"₹{round(profit_loss,2)}"
-    )
-
-    # -------------------------
-    # PERFORMANCE INTERPRETATION
-    # -------------------------
-    st.subheader("🧠 AI Interpretation")
-
-    if monthly_return > 5:
-        st.success(
-            "Your portfolio performed very well this month due to positive market momentum."
-        )
-    elif monthly_return > 0:
-        st.info(
-            "Your portfolio delivered modest gains. This is healthy for long-term investing."
-        )
-    elif monthly_return > -3:
-        st.warning(
-            "Minor decline observed. Market volatility is normal. No action required."
-        )
-    else:
-        st.error(
-            "Portfolio faced a short-term dip. Avoid panic selling."
-        )
-
-    # -------------------------
-    # RISK MONITOR AGENT
-    # -------------------------
-    st.subheader("🛡️ Risk Monitor")
-
-    risk = st.session_state.risk
-
-    if risk <= 5:
-        st.write("• Low-risk profile → Capital protection prioritized")
-    elif risk <= 10:
-        st.write("• Medium-risk profile → Balanced growth approach")
-    else:
-        st.write("• High-risk profile → Volatility expected")
-
-    st.info(
-        "Risk is managed through diversification across Equity, Debt, and Gold."
-    )
-
-    # -------------------------
-    # DECISION ADVISOR AGENT
-    # -------------------------
-    st.subheader("📌 AI Recommendation")
-
-    if monthly_return > 3:
-        decision = "HOLD"
-        explanation = "Your investments are aligned with market trend."
-    elif monthly_return > -3:
-        decision = "WAIT & WATCH"
-        explanation = "Market is consolidating. Monitor before acting."
-    else:
-        decision = "REBALANCE"
-        explanation = "Reduce equity exposure slightly and increase debt."
-
-    st.success(f"**Recommended Action:** {decision}")
-    st.caption(explanation)
-
-    # -------------------------
-    # FINANCIAL EDUCATOR AGENT
-    # -------------------------
-    st.subheader("🎓 Learn from This Month")
-
-    st.markdown("""
-    **Key Learning:**
-    - Short-term ups and downs are normal
-    - Long-term investing benefits from patience
-    - Diversification reduces risk
-    """)
-
-    # -------------------------
-    # FUTURE EXTENSION
-    # -------------------------
-    st.subheader("🚀 What Happens Next?")
-
-    st.write("""
-    In future versions, this agent will:
-    - Track real-time portfolio value
-    - Alert on risk events
-    - Suggest SIP increases
-    - Use GenAI to explain market news
-    """)
-
+if score >= 2:
+    decision = "BUY"
+elif score == 1:
+    decision = "HOLD"
 else:
-    st.warning("Please complete Phase 3 Portfolio Allocation first.")
+    decision = "WAIT"
 
-# =========================
-# END OF PHASE 4
-# =========================
+st.success(f"📌 AI Recommendation: **{decision}**")
 
-st.divider()
-st.caption("✅ Phase 4 Complete – Intelligent Monitoring & Learning Agent")
 
+st.header("🎓 Financial Educator")
+
+with st.expander("What do these indicators mean?"):
+    st.write("**RSI**: Shows whether a stock is overbought or oversold.")
+    st.write("**MACD**: Shows momentum and trend strength.")
+    st.write("**Moving Average**: Shows overall price direction.")
+    st.write("**Diversification**: Spreading money to reduce risk.")
+
+
+st.header("📈 Portfolio Performance Monitor")
+
+monthly_return = np.random.uniform(-3, 6)
+st.write(f"Simulated Monthly Return: **{round(monthly_return,2)}%**")
+
+if monthly_return > 0:
+    st.success("Portfolio performed well this month.")
+else:
+    st.warning("Market was weak. Long-term discipline is key.")
+
+
+st.header("🔮 Financial Planning Forecast")
+
+monthly = st.number_input("Monthly Investment (₹)", 1000, 50000, 10000)
+years = st.slider("Investment Duration (Years)", 1, 30, 5)
+
+rate = 12 / 100 / 12
+months = years * 12
+
+future_value = monthly * ((1 + rate)**months - 1) / rate
+
+st.success(f"Expected Value after {years} years: ₹{round(future_value,2)}")
