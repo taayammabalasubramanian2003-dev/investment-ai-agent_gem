@@ -271,38 +271,72 @@ st.divider()
 st.caption("✅ Phase 2 & Phase 3 complete – Transparent AI Investment Agent")
 
 
-st.header("🧠 AI Decision Agent")
 
-score = 0
-if trend == "BULLISH":
-    score += 1
-if rsi_value > 50:
-    score += 1
-if macd_signal == "BULLISH":
-    score += 1
+# =========================
+# PHASE 4: AI DECISION ENGINE
+# =========================
 
-if score >= 2:
-    decision = "BUY"
-elif score == 1:
-    decision = "HOLD"
+st.header("🧠 Phase 4: AI Decision Agent")
+
+# Safety check
+if (
+    "trend" not in st.session_state or
+    "rsi_value" not in st.session_state or
+    "macd_signal" not in st.session_state
+):
+    st.warning(
+        "⚠️ Please analyze a stock in Phase 2 to activate AI Decision Agent."
+    )
+
 else:
-    decision = "WAIT"
+    trend = st.session_state.trend
+    rsi_value = st.session_state.rsi_value
+    macd_signal = st.session_state.macd_signal
 
-st.success(f"📌 AI Recommendation: **{decision}**")
+    score = 0
 
+    if trend == "BULLISH":
+        score += 1
+    if rsi_value > 50:
+        score += 1
+    if macd_signal == "BULLISH":
+        score += 1
+
+    if score >= 2:
+        decision = "BUY"
+    elif score == 1:
+        decision = "HOLD"
+    else:
+        decision = "WAIT"
+
+    st.success(f"📌 AI Recommendation: **{decision}**")
+
+    st.caption(
+        "Decision is based on Trend + Momentum (RSI) + Strength (MACD)"
+    )
+
+
+# =========================
+# FINANCIAL EDUCATOR AGENT
+# =========================
 
 st.header("🎓 Financial Educator")
 
-with st.expander("What do these indicators mean?"):
-    st.write("**RSI**: Shows whether a stock is overbought or oversold.")
+with st.expander("📘 What do these indicators mean?"):
+    st.write("**RSI (Relative Strength Index)**: Shows buying or selling pressure.")
     st.write("**MACD**: Shows momentum and trend strength.")
-    st.write("**Moving Average**: Shows overall price direction.")
-    st.write("**Diversification**: Spreading money to reduce risk.")
+    st.write("**Moving Averages**: Show overall price direction.")
+    st.write("**Diversification**: Reduces risk by spreading investments.")
 
+
+# =========================
+# PORTFOLIO PERFORMANCE MONITOR
+# =========================
 
 st.header("📈 Portfolio Performance Monitor")
 
 monthly_return = np.random.uniform(-3, 6)
+
 st.write(f"Simulated Monthly Return: **{round(monthly_return,2)}%**")
 
 if monthly_return > 0:
@@ -311,14 +345,40 @@ else:
     st.warning("Market was weak. Long-term discipline is key.")
 
 
+# =========================
+# FINANCIAL PLANNING FORECAST
+# =========================
+
 st.header("🔮 Financial Planning Forecast")
 
-monthly = st.number_input("Monthly Investment (₹)", 1000, 50000, 10000)
-years = st.slider("Investment Duration (Years)", 1, 30, 5)
+monthly = st.number_input(
+    "Monthly Investment (₹)",
+    min_value=1000,
+    max_value=50000,
+    value=10000
+)
+
+years = st.slider(
+    "Investment Duration (Years)",
+    min_value=1,
+    max_value=30,
+    value=5
+)
 
 rate = 12 / 100 / 12
 months = years * 12
 
 future_value = monthly * ((1 + rate)**months - 1) / rate
 
-st.success(f"Expected Value after {years} years: ₹{round(future_value,2)}")
+st.success(
+    f"Expected Value after {years} years: ₹{round(future_value,2)}"
+)
+
+st.caption(
+    "Assumes 12% annual return with monthly compounding."
+)
+
+
+st.divider()
+st.caption("✅ Phase 4 Complete – AI Decision, Education & Financial Planning")
+
