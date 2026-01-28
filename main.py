@@ -270,3 +270,123 @@ else:
 st.divider()
 st.caption("✅ Phase 2 & Phase 3 complete – Transparent AI Investment Agent")
 
+
+# =========================
+# PHASE 4 – PORTFOLIO MONITORING
+# =========================
+
+st.divider()
+st.header("📈 Phase 4: Portfolio Performance & Guidance")
+
+st.caption("This phase helps you track performance, understand risks, and learn better investing.")
+
+# Ensure portfolio exists
+if "capital" in st.session_state and st.session_state.capital > 0:
+
+    st.subheader("📊 Portfolio Performance (Simulated)")
+
+    # Simulated monthly return (replace with real API later)
+    monthly_return = np.random.uniform(-4, 8)
+
+    current_value = st.session_state.capital * (1 + monthly_return / 100)
+    profit_loss = current_value - st.session_state.capital
+
+    st.metric(
+        label="📈 Portfolio Monthly Change",
+        value=f"{round(monthly_return,2)}%",
+        delta=f"₹{round(profit_loss,2)}"
+    )
+
+    # -------------------------
+    # PERFORMANCE INTERPRETATION
+    # -------------------------
+    st.subheader("🧠 AI Interpretation")
+
+    if monthly_return > 5:
+        st.success(
+            "Your portfolio performed very well this month due to positive market momentum."
+        )
+    elif monthly_return > 0:
+        st.info(
+            "Your portfolio delivered modest gains. This is healthy for long-term investing."
+        )
+    elif monthly_return > -3:
+        st.warning(
+            "Minor decline observed. Market volatility is normal. No action required."
+        )
+    else:
+        st.error(
+            "Portfolio faced a short-term dip. Avoid panic selling."
+        )
+
+    # -------------------------
+    # RISK MONITOR AGENT
+    # -------------------------
+    st.subheader("🛡️ Risk Monitor")
+
+    risk = st.session_state.risk
+
+    if risk <= 5:
+        st.write("• Low-risk profile → Capital protection prioritized")
+    elif risk <= 10:
+        st.write("• Medium-risk profile → Balanced growth approach")
+    else:
+        st.write("• High-risk profile → Volatility expected")
+
+    st.info(
+        "Risk is managed through diversification across Equity, Debt, and Gold."
+    )
+
+    # -------------------------
+    # DECISION ADVISOR AGENT
+    # -------------------------
+    st.subheader("📌 AI Recommendation")
+
+    if monthly_return > 3:
+        decision = "HOLD"
+        explanation = "Your investments are aligned with market trend."
+    elif monthly_return > -3:
+        decision = "WAIT & WATCH"
+        explanation = "Market is consolidating. Monitor before acting."
+    else:
+        decision = "REBALANCE"
+        explanation = "Reduce equity exposure slightly and increase debt."
+
+    st.success(f"**Recommended Action:** {decision}")
+    st.caption(explanation)
+
+    # -------------------------
+    # FINANCIAL EDUCATOR AGENT
+    # -------------------------
+    st.subheader("🎓 Learn from This Month")
+
+    st.markdown("""
+    **Key Learning:**
+    - Short-term ups and downs are normal
+    - Long-term investing benefits from patience
+    - Diversification reduces risk
+    """)
+
+    # -------------------------
+    # FUTURE EXTENSION
+    # -------------------------
+    st.subheader("🚀 What Happens Next?")
+
+    st.write("""
+    In future versions, this agent will:
+    - Track real-time portfolio value
+    - Alert on risk events
+    - Suggest SIP increases
+    - Use GenAI to explain market news
+    """)
+
+else:
+    st.warning("Please complete Phase 3 Portfolio Allocation first.")
+
+# =========================
+# END OF PHASE 4
+# =========================
+
+st.divider()
+st.caption("✅ Phase 4 Complete – Intelligent Monitoring & Learning Agent")
+
