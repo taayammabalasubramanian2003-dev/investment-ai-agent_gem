@@ -1,88 +1,153 @@
 import streamlit as st
-from crewai import Agent, Task, Crew, Process
-from langchain_google_genai import ChatGoogleGenerativeAI
-import os
 import yfinance as yf
+import pandas as pd
+import numpy as np
+import plotly.graph_objects as go
 
-# 1. SETUP: Connect to Gemini using your Secret Key
-# Make sure you have added GEMINI_API_KEY in Streamlit Cloud Secrets
-gemini_key = st.secrets["GEMINI_API_KEY"]
-llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash",
-    verbose=True,
-    temperature=0.5,
-    google_api_key=gemini_key
+st.set_page_config(page_title="AI Investment Analyst", layout="wide")
+
+# =========================
+# HEADER
+# =========================
+st.title("🤖 AI Investment Analyst Agent")
+st.subheader("Beginner-friendly Investment Assistant")
+
+# =========================
+# INVESTOR PROFILE
+# =========================
+st.header("👤 Investor Profile")
+
+name = st.text_input("Your Name")
+age = st.number_input("Age", min_value=18, max_value=100)
+income = st.number_input("Monthly Income (₹)", min_value=0)
+savings = st.number_input("Monthly Savings (₹)", min_value=0)
+risk = st.slider("Risk Appetite (%)", 1, 20)
+
+st.divider()
+
+# =========================
+# USER INTENT
+# =========================
+choice = st.radio(
+    "What do you want to do?",
+    ["Analyze a Stock", "Portfolio Allocation"]
 )
 
-# 2. UI: Create the User Interface
-st.set_page_config(page_title="AI Investment Advisor", layout="wide")
-st.title("📈 Multi-Agent Investment Advisory System")
-st.markdown("Your 24/7 Digital Financial Analyst and Portfolio Manager.")
+# =========================
+# ANALYZE A STOCK
+# =========================
+if choice == "Analyze a Stock":
+    st.header("📊 Stock Analysis")
 
-with st.sidebar:
-    st.header("User Profile")
-    age = st.number_input("Age", min_value=18, max_value=100, value=21)
-    income = st.number_input("Annual Income ($)", min_value=0, value=50000)
-    capital = st.number_input("Investment Capital ($)", min_value=0, value=5000)
-    risk_appetite = st.selectbox("Risk Appetite", ["Low", "Medium", "High"])
-    
-stock_ticker = st.text_input("Enter Stock Ticker (e.g., AAPL, RELIANCE.NS)", value="AAPL")
+    symbol = st.text_input("Enter Stock Symbol (e.g., INFY.NS, TCS.NS)")
+    mode = st.selectbox("Mode", ["INVESTOR", "TRADER"])
 
-# 3. AGENTS: Define the Experts
-educator = Agent(
-    role='Financial Educator',
-    goal='Explain investment concepts simply to beginners',
-    backstory='You make finance easy for students by explaining terms like SIP and Equity clearly.',
-    llm=llm,
-    allow_delegation=False
-)
+    if st.button("Analyze Stock") and symbol:
+        period = "5y" if mode == "INVESTOR" else "6mo"
+        interval = "1mo" if mode == "INVESTOR" else "1d"
 
-researcher = Agent(
-    role='Stock Market Researcher',
-    goal=f'Analyze {stock_ticker} 5-year trends and current news',
-    backstory='You are an expert at fetching financial data and identifying market sentiment.',
-    llm=llm,
-    allow_delegation=True
-)
+        stock = yf.Ticker(symbol)
+        df = stock.history(period=period, interval=interval)
+        df.reset_index(inplace=True)
 
-advisor = Agent(
-    role='Portfolio Advisor',
-    goal='Provide a customized investment plan',
-    backstory='You combine market data with user risk profiles to give Buy/Sell/Hold advice.',
-    llm=llm,
-    allow_delegation=False
-)
+        # =========================
+        # MOVING AVERAGES
+        # =========================
+        df["MA20"] = df["Close"].rolling(20).mean()
+        df["MA50"] = df["Close"].rolling(50).mean()
 
-# 4. TASKS: Assign the Work
-task_educate = Task(
-    description=f"Explain what investing in {stock_ticker} means for a {age}-year-old with {risk_appetite} risk.",
-    agent=educator,
-    expected_output="A simple 2-line explanation of the investment type."
-)
+        # =========================
+        # CANDLESTICK CHART
+        # =========================
+        st.subheader("🕯️ Price Action (Candlestick Chart)")
 
-task_analyze = Task(
-    description=f"Analyze the 5-year price history of {stock_ticker} and find the latest news.",
-    agent=researcher,
-    expected_output="A summary of historical performance and current market mood."
-)
-
-task_recommend = Task(
-    description=f"Based on the analysis and the user's capital of {capital}, suggest a Buy, Sell, or Hold action.",
-    agent=advisor,
-    expected_output="A clear recommendation with a breakdown of how many shares to buy."
-)
-
-# 5. EXECUTION: Run the Crew
-if st.button("Run Full Investment Analysis"):
-    with st.spinner("Agents are collaborating on your analysis..."):
-        investment_crew = Crew(
-            agents=[educator, researcher, advisor],
-            tasks=[task_educate, task_analyze, task_recommend],
-            process=Process.sequential
+        fig = go.Figure()
+        fig.add_candlestick(
+            x=df["Date"],
+            open=df["Open"],
+            high=df["High"],
+            low=df["Low"],
+            close=df["Close"],
+            name="Price"
         )
-        
-        result = investment_crew.kickoff()
-        
-        st.success("Analysis Complete!")
-        st.markdown("### 🤖 Agent Recommendations")
-        st.write(result)
+        fig.add_trace(go.Scatter(x=df["Date"], y=df["MA20"], name="MA20"))
+        fig.add_trace(go.Scatter(x=df["Date"], y=df["MA50"], name="MA50"))
+        fig.update_layout(height=500)
+        st.plotly_chart(fig, use_container_width=True)
+
+        trend = "BULLISH" if df["MA20"].iloc[-1] > df["MA50"].iloc[-1] else "BEARISH"
+        st.success(f"📈 Trend: {trend}")
+        st.caption("MA20 above MA50 = bullish trend")
+
+        # =========================
+        # RSI
+        # =========================
+        delta = df["Close"].diff()
+        gain = delta.clip(lower=0)
+        loss = -delta.clip(upper=0)
+
+        avg_gain = gain.rolling(14).mean()
+        avg_loss = loss.rolling(14).mean()
+        rs = avg_gain / avg_loss
+        df["RSI"] = 100 - (100 / (1 + rs))
+
+        rsi_value = df["RSI"].iloc[-1]
+        rsi_signal = "BULLISH" if rsi_value > 50 else "BEARISH"
+
+        st.subheader("📉 RSI Indicator")
+        st.line_chart(df.set_index("Date")["RSI"])
+        st.write(f"RSI Value: **{round(rsi_value,2)}** → {rsi_signal}")
+        st.caption("RSI > 50 = strength | RSI < 50 = weakness")
+
+        # =========================
+        # MACD
+        # =========================
+        ema12 = df["Close"].ewm(span=12, adjust=False).mean()
+        ema26 = df["Close"].ewm(span=26, adjust=False).mean()
+        df["MACD"] = ema12 - ema26
+        df["Signal"] = df["MACD"].ewm(span=9, adjust=False).mean()
+
+        macd_signal = "BULLISH" if df["MACD"].iloc[-1] > df["Signal"].iloc[-1] else "BEARISH"
+
+        st.subheader("📊 MACD Indicator")
+        st.line_chart(df.set_index("Date")[["MACD", "Signal"]])
+        st.write(f"MACD Signal: **{macd_signal}**")
+
+        # =========================
+        # FUNDAMENTAL ANALYSIS
+        # =========================
+        st.header("🏦 Fundamental Analysis")
+
+        info = stock.info
+        st.write("**Sector:**", info.get("sector"))
+        st.write("**P/E Ratio:**", info.get("trailingPE"))
+        st.write("**EPS:**", info.get("trailingEps"))
+        st.write("**Market Cap:**", info.get("marketCap"))
+
+        st.info(
+            "This analysis combines technical indicators (price, RSI, MACD) "
+            "with company fundamentals to help you understand both market behavior "
+            "and company strength."
+        )
+
+# =========================
+# PORTFOLIO ALLOCATION (PREVIEW)
+# =========================
+else:
+    st.header("💼 Portfolio Allocation (Preview – Phase 3)")
+    st.warning("Portfolio allocation logic will be implemented in Phase 3.")
+    st.write(
+        """
+        In the next phase, the agent will:
+        - Ask investment duration
+        - Ask sector preference
+        - Split money across Equity, Gold, Debt, ETFs
+        - Suggest top companies with manageable risk
+        """
+    )
+
+# =========================
+# FOOTER
+# =========================
+st.divider()
+st.caption("Phase 2 complete: Visual analysis & transparent backend reasoning")
