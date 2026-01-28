@@ -143,6 +143,11 @@ if choice == "Analyze a Stock":
         st.write(f"MACD Signal: **{macd_signal}**")
         st.caption("MACD confirms trend direction")
 
+        # 🔑 SAVE FOR PHASE 4
+        st.session_state.trend = trend
+        st.session_state.rsi_value = rsi_value
+        st.session_state.macd_signal = macd_signal
+
         # -------------------------
         # FUNDAMENTAL ANALYSIS
         # -------------------------
