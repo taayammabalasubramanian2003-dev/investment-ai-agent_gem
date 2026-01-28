@@ -285,26 +285,16 @@ st.caption("✅ Phase 2 & Phase 3 complete – Transparent AI Investment Agent")
 
 st.header("🧠 Phase 4: AI Decision Agent")
 
+st.header("🧠 AI Decision Agent")
 
-
-
-# Safety check
-if (
-    "trend" not in st.session_state or
-    "rsi_value" not in st.session_state or
-    "macd_signal" not in st.session_state
-):
-    st.warning(
-        "⚠️ Please analyze a stock in Phase 2 to activate AI Decision Agent."
-    )
-
+if "stock_analyzed" not in st.session_state:
+    st.warning("⚠️ Please analyze a stock in Phase 2 to activate AI Decision Agent.")
 else:
     trend = st.session_state.trend
     rsi_value = st.session_state.rsi_value
     macd_signal = st.session_state.macd_signal
 
     score = 0
-
     if trend == "BULLISH":
         score += 1
     if rsi_value > 50:
@@ -312,18 +302,11 @@ else:
     if macd_signal == "BULLISH":
         score += 1
 
-    if score >= 2:
-        decision = "BUY"
-    elif score == 1:
-        decision = "HOLD"
-    else:
-        decision = "WAIT"
-
+    decision = "BUY" if score >= 2 else "HOLD" if score == 1 else "WAIT"
     st.success(f"📌 AI Recommendation: **{decision}**")
 
-    st.caption(
-        "Decision is based on Trend + Momentum (RSI) + Strength (MACD)"
-    )
+
+
 
 
 # =========================
