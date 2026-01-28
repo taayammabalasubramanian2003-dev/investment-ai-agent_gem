@@ -147,6 +147,8 @@ if choice == "Analyze a Stock":
         st.session_state.trend = trend
         st.session_state.rsi_value = rsi_value
         st.session_state.macd_signal = macd_signal
+        st.session_state.stock_analyzed = True
+
 
         # -------------------------
         # FUNDAMENTAL ANALYSIS
@@ -283,9 +285,7 @@ st.caption("✅ Phase 2 & Phase 3 complete – Transparent AI Investment Agent")
 
 st.header("🧠 Phase 4: AI Decision Agent")
 
-if "trend" not in st.session_state:
-    st.warning("Please analyze a stock in Phase 2 to activate AI Decision Agent.")
-    st.stop()
+
 
 
 # Safety check
