@@ -281,34 +281,53 @@ st.caption("✅ Phase 2 & Phase 3 complete – Transparent AI Investment Agent")
 
 
 
-# =========================
-# PHASE 4: AI DECISION ENGINE
-# =========================
+# ============================================================
+# ======================= PHASE 4 =============================
+# ============================================================
 
-st.header("🧠 Phase 4: AI Decision Agent")
+# Phase 4 should run ONLY if stock was analyzed
+if choice == "Analyze a Stock":
 
-# Safety check
-st.header("🧠 Phase 4: AI Decision Agent")
+    st.divider()
+    st.header("🧠 Phase 4: AI Decision Agent")
 
-if not st.session_state.get("stock_analyzed", False):
-    st.info("ℹ️ Analyze a stock in Phase 2 to unlock AI Decision Agent.")
-    st.stop()
+    if "stock_analyzed" not in st.session_state:
+        st.warning("⚠️ Analyze a stock in Phase 2 to activate AI Decision Agent.")
+        st.stop()
 
-
-else:
+    # Fetch saved values
     trend = st.session_state.trend
     rsi_value = st.session_state.rsi_value
     macd_signal = st.session_state.macd_signal
+    stock_name = symbol.upper()
 
+    # -------------------------
+    # AI SCORING LOGIC
+    # -------------------------
     score = 0
+    reasons = []
 
     if trend == "BULLISH":
         score += 1
+        reasons.append("Price trend is bullish (MA crossover)")
+    else:
+        reasons.append("Price trend is weak or bearish")
+
     if rsi_value > 50:
         score += 1
+        reasons.append("RSI shows buying strength")
+    else:
+        reasons.append("RSI shows weak momentum")
+
     if macd_signal == "BULLISH":
         score += 1
+        reasons.append("MACD confirms upward momentum")
+    else:
+        reasons.append("MACD does not confirm strength")
 
+    # -------------------------
+    # FINAL DECISION
+    # -------------------------
     if score >= 2:
         decision = "BUY"
     elif score == 1:
@@ -316,78 +335,62 @@ else:
     else:
         decision = "WAIT"
 
-    st.success(f"📌 AI Recommendation: **{decision}**")
+    st.success(f"📌 **AI Recommendation for {stock_name}: {decision}**")
 
-    st.caption(
-        "Decision is based on Trend + Momentum (RSI) + Strength (MACD)"
+    st.subheader("🧠 Why this decision?")
+    for r in reasons:
+        st.write("•", r)
+
+    # -------------------------
+    # EDUCATOR SECTION
+    # -------------------------
+    st.subheader("🎓 Indicator Explanation")
+
+    with st.expander("📘 What do these indicators mean?"):
+        st.write("**RSI**: Measures buying vs selling pressure.")
+        st.write("**MACD**: Confirms trend strength and direction.")
+        st.write("**Moving Averages**: Show overall price direction.")
+        st.write("**Candlestick Charts**: Show market psychology.")
+
+    # -------------------------
+    # FINANCIAL PLANNING (WITH CHART)
+    # -------------------------
+    st.subheader("🔮 Financial Planning Forecast")
+
+    monthly = st.number_input(
+        "Monthly SIP Investment (₹)",
+        min_value=1000,
+        max_value=50000,
+        value=10000
     )
 
+    years = st.slider(
+        "Investment Duration (Years)",
+        min_value=1,
+        max_value=30,
+        value=5
+    )
 
+    rate = 12 / 100 / 12
+    months = years * 12
 
+    fv = monthly * ((1 + rate) ** months - 1) / rate
 
+    st.success(f"📈 Expected Value after {years} years: ₹{round(fv,2)}")
 
-# =========================
-# FINANCIAL EDUCATOR AGENT
-# =========================
+    # Chart
+    values = []
+    for m in range(1, months + 1):
+        values.append(monthly * ((1 + rate) ** m - 1) / rate)
 
-st.header("🎓 Financial Educator")
+    chart_df = pd.DataFrame({
+        "Month": range(1, months + 1),
+        "Investment Value": values
+    })
 
-with st.expander("📘 What do these indicators mean?"):
-    st.write("**RSI (Relative Strength Index)**: Shows buying or selling pressure.")
-    st.write("**MACD**: Shows momentum and trend strength.")
-    st.write("**Moving Averages**: Show overall price direction.")
-    st.write("**Diversification**: Reduces risk by spreading investments.")
+    st.line_chart(chart_df.set_index("Month"))
 
+    st.caption(
+        "Assumes 12% annual return • Monthly SIP • Power of compounding"
+    )
 
-# =========================
-# PORTFOLIO PERFORMANCE MONITOR
-# =========================
-
-st.header("📈 Portfolio Performance Monitor")
-
-monthly_return = np.random.uniform(-3, 6)
-
-st.write(f"Simulated Monthly Return: **{round(monthly_return,2)}%**")
-
-if monthly_return > 0:
-    st.success("Portfolio performed well this month.")
-else:
-    st.warning("Market was weak. Long-term discipline is key.")
-
-
-# =========================
-# FINANCIAL PLANNING FORECAST
-# =========================
-
-st.header("🔮 Financial Planning Forecast")
-
-monthly = st.number_input(
-    "Monthly Investment (₹)",
-    min_value=1000,
-    max_value=50000,
-    value=10000
-)
-
-years = st.slider(
-    "Investment Duration (Years)",
-    min_value=1,
-    max_value=30,
-    value=5
-)
-
-rate = 12 / 100 / 12
-months = years * 12
-
-future_value = monthly * ((1 + rate)**months - 1) / rate
-
-st.success(
-    f"Expected Value after {years} years: ₹{round(future_value,2)}"
-)
-
-st.caption(
-    "Assumes 12% annual return with monthly compounding."
-)
-
-
-st.divider()
-st.caption("✅ Phase 4 Complete – AI Decision, Education & Financial Planning")
