@@ -288,14 +288,12 @@ st.caption("✅ Phase 2 & Phase 3 complete – Transparent AI Investment Agent")
 st.header("🧠 Phase 4: AI Decision Agent")
 
 # Safety check
-if (
-    "trend" not in st.session_state or
-    "rsi_value" not in st.session_state or
-    "macd_signal" not in st.session_state
-):
-    st.warning(
-        "⚠️ Please analyze a stock in Phase 2 to activate AI Decision Agent."
-    )
+st.header("🧠 Phase 4: AI Decision Agent")
+
+if not st.session_state.get("stock_analyzed", False):
+    st.info("ℹ️ Analyze a stock in Phase 2 to unlock AI Decision Agent.")
+    st.stop()
+
 
 else:
     trend = st.session_state.trend
