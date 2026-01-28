@@ -168,70 +168,117 @@ st.divider()
 st.caption("Phase 2 complete: Visual analysis & transparent backend reasoning")
 
 
+import streamlit as st
+
+st.set_page_config(page_title="AI Investment Analyst", layout="wide")
 
 # =========================
-# PHASE 3: PORTFOLIO ALLOCATION
+# HEADER
 # =========================
+st.title("🤖 AI Investment Analyst Agent")
+st.caption("Phase 3 – Personalized Portfolio Allocation")
 
-if choice == "Portfolio Allocation":
-    st.header("💼 Personalized Portfolio Allocation")
+# =========================
+# INVESTOR PROFILE
+# =========================
+st.header("👤 Investor Profile")
 
-    capital = st.number_input("Total Investment Amount (₹)", min_value=1000, step=1000)
-    horizon = st.selectbox(
-        "Investment Horizon",
-        ["Short-term (1–2 years)", "Medium-term (3–5 years)", "Long-term (5+ years)"]
+name = st.text_input("Your Name", key="name")
+age = st.number_input("Age", min_value=18, max_value=100, key="age")
+income = st.number_input("Monthly Income (₹)", min_value=0, key="income")
+savings = st.number_input("Monthly Savings (₹)", min_value=0, key="savings")
+risk = st.slider("Risk Appetite (%)", 1, 20, key="risk")
+
+st.divider()
+
+# =========================
+# PORTFOLIO INPUTS
+# =========================
+st.header("📊 Personalized Portfolio Allocation")
+
+capital = st.number_input(
+    "Total Investment Amount (₹)",
+    min_value=1000,
+    step=500,
+    key="capital"
+)
+
+horizon = st.selectbox(
+    "Investment Horizon",
+    ["Short-term (1–3 years)", "Medium-term (3–5 years)", "Long-term (5+ years)"],
+    key="horizon"
+)
+
+sector_pref = st.radio(
+    "Sector Preference",
+    ["Multiple Sectors (Recommended)", "Single Sector"],
+    key="sector_pref"
+)
+
+assets = st.multiselect(
+    "Choose Asset Types",
+    ["Equity", "Debt", "Gold ETF"],
+    default=["Equity", "Debt", "Gold ETF"],
+    key="assets"
+)
+
+# =========================
+# ALLOCATION LOGIC
+# =========================
+if st.button("Generate Portfolio") and capital > 0:
+
+    # Dynamic allocation based on risk
+    if risk <= 5:
+        allocation = {"Equity": 40, "Debt": 40, "Gold ETF": 20}
+    elif risk <= 10:
+        allocation = {"Equity": 60, "Debt": 25, "Gold ETF": 15}
+    else:
+        allocation = {"Equity": 75, "Debt": 15, "Gold ETF": 10}
+
+    st.subheader("📊 Allocation Breakdown")
+
+    for asset, percent in allocation.items():
+        if asset in assets:
+            amount = capital * (percent / 100)
+            st.write(f"**{asset} → ₹{round(amount,2)} ({percent}%)**")
+
+    # =========================
+    # DYNAMIC COMPANY SUGGESTIONS
+    # =========================
+    st.subheader("🏢 Suggested Investments")
+
+    if "Equity" in assets:
+        st.markdown("### 📈 Equity (Stable Leaders)")
+        st.write("• HDFC Bank – Financial stability")
+        st.write("• TCS – IT sector leader")
+        st.write("• Infosys – Consistent earnings growth")
+
+    if "Debt" in assets:
+        st.markdown("### 🏦 Debt (Capital Protection)")
+        st.write("• ICICI Pru Corporate Bond Fund")
+        st.write("• HDFC Corporate Bond Fund")
+
+    if "Gold ETF" in assets:
+        st.markdown("### 🪙 Gold ETF (Inflation Hedge)")
+        st.write("• GOLDBEES.NS")
+
+    # =========================
+    # EXPLANATION
+    # =========================
+    st.subheader("🧠 Why this portfolio?")
+
+    st.info(
+        f"""
+        • Your **risk appetite is {risk}%**, so capital protection is prioritized  
+        • Equity gives long-term growth  
+        • Debt stabilizes the portfolio  
+        • Gold hedges inflation & uncertainty  
+        • Allocation optimized for **{horizon}**
+        """
     )
 
-    sector_pref = st.radio(
-        "Sector Preference",
-        ["Multiple Sectors (Recommended)", "Single Sector"]
-    )
-
-    asset_types = st.multiselect(
-        "Choose Asset Types",
-        ["Equity", "Debt", "Gold ETF", "ETF"],
-        default=["Equity", "Debt", "Gold ETF"]
-    )
-
-    if st.button("Generate Portfolio") and capital > 0:
-
-        # -------- Allocation Logic --------
-        if risk <= 5:
-            allocation = {"Equity": 40, "Debt": 40, "Gold ETF": 20}
-        elif risk <= 10:
-            allocation = {"Equity": 60, "Debt": 25, "Gold ETF": 15}
-        else:
-            allocation = {"Equity": 75, "Debt": 15, "Gold ETF": 10}
-
-        st.subheader("📊 Allocation Breakdown")
-
-        for asset, percent in allocation.items():
-            if asset in asset_types:
-                amount = capital * percent / 100
-                st.write(f"**{asset}** → ₹{round(amount,2)} ({percent}%)")
-
-        # -------- Company Suggestions --------
-        st.subheader("🏢 Suggested Investments")
-
-        suggestions = {
-            "Equity": ["HDFC Bank", "TCS", "Infosys"],
-            "Debt": ["ICICI Pru Bond Fund", "HDFC Corporate Bond"],
-            "Gold ETF": ["GOLDBEES.NS"],
-            "ETF": ["NIFTYBEES.NS"]
-        }
-
-        for asset in asset_types:
-            st.write(f"**{asset}:**")
-            for item in suggestions.get(asset, []):
-                st.write("•", item)
-
-        # -------- Explanation --------
-        st.info(
-            f"""
-            🧠 **Why this portfolio?**
-            - Your risk appetite is **{risk}%**, so capital protection is prioritized.
-            - Equity provides growth, Debt provides stability.
-            - Gold hedges inflation and market uncertainty.
-            - Allocation is optimized for **{horizon}**.
-            """
-        )
+# =========================
+# FOOTER
+# =========================
+st.divider()
+st.caption("✅ Phase 3 Complete – Dynamic, Risk-Aware Portfolio Allocation")
