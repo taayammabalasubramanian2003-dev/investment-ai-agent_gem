@@ -1,7 +1,11 @@
 import streamlit as st
 import google.generativeai as genai
 import os
-
+import streamlit as st
+import yfinance as yf
+import pandas as pd
+import numpy as np
+import plotly.graph_objects as go
 # =========================
 # GEMINI SETUP
 # =========================
