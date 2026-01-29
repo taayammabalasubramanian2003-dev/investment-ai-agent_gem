@@ -1,12 +1,10 @@
 import streamlit as st
-import yfinance as yf
-import pandas as pd
-import numpy as np
-import plotly.graph_objects as go
-
-#GEMINI SETUP
 import google.generativeai as genai
 import os
+
+# =========================
+# GEMINI SETUP
+# =========================
 api_key = os.getenv("GEMINI_API_KEY")
 
 if not api_key:
@@ -14,18 +12,7 @@ if not api_key:
     st.stop()
 
 genai.configure(api_key=api_key)
-model = genai.GenerativeModel("models/gemini-pro")
-
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-#model = genai.GenerativeModel("gemini-pro")
 model = genai.GenerativeModel("models/gemini-1.5-flash")
-st.subheader("🧪 Gemini Test")
-
-if os.getenv("GEMINI_API_KEY") is None:
-    st.error("❌ Gemini API key not found. Check Streamlit Secrets.")
-else:
-    st.success("✅ Gemini API key detected")
-    st.write(ai_explain("Say hello in one sentence"))
 
 # =========================
 # AI EXPLANATION FUNCTION
@@ -34,12 +21,16 @@ def ai_explain(prompt):
     try:
         response = model.generate_content(prompt)
         return response.text
-    except Exception as e:
+    except Exception:
         return "⚠️ AI explanation temporarily unavailable."
-        
-st.write(ai_explain("Say hello in one line"))
+
+# =========================
+# GEMINI TEST
+# =========================
 st.subheader("🧪 Gemini Test")
+st.success("✅ Gemini API key detected")
 st.write(ai_explain("Say hello to a beginner investor in one line"))
+
 
 # =========================
 # PAGE CONFIG
