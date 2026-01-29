@@ -19,6 +19,13 @@ model = genai.GenerativeModel("models/gemini-pro")
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 #model = genai.GenerativeModel("gemini-pro")
 model = genai.GenerativeModel("models/gemini-1.5-flash")
+st.subheader("🧪 Gemini Test")
+
+if os.getenv("GEMINI_API_KEY") is None:
+    st.error("❌ Gemini API key not found. Check Streamlit Secrets.")
+else:
+    st.success("✅ Gemini API key detected")
+    st.write(ai_explain("Say hello in one sentence"))
 
 # =========================
 # AI EXPLANATION FUNCTION
