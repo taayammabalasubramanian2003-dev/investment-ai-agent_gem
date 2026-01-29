@@ -12,7 +12,7 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 #model = genai.GenerativeModel("gemini-pro")
 model = genai.GenerativeModel("models/gemini-1.5-flash")
 
-
+st.write(ai_explain("Say hello in one line"))
 # =========================
 # PAGE CONFIG
 # =========================
