@@ -3,29 +3,28 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-
-#GEMINI SETUP
-import google.generativeai as genai
 import os
+import google.generativeai as genai
+
+# =========================
+# PAGE CONFIG (FIRST)
+# =========================
+st.set_page_config(
+    page_title="AI Investment Analyst",
+    layout="wide"
+)
+
+# =========================
+# GEMINI SETUP (ONE TIME)
+# =========================
 api_key = os.getenv("GEMINI_API_KEY")
 
 if not api_key:
-    st.error("❌ Gemini API key not found. Please check Streamlit Secrets.")
+    st.error("❌ Gemini API key not found. Add GEMINI_API_KEY in Streamlit Secrets.")
     st.stop()
 
 genai.configure(api_key=api_key)
-model = genai.GenerativeModel("models/gemini-pro")
-
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-#model = genai.GenerativeModel("gemini-pro")
 model = genai.GenerativeModel("models/gemini-1.5-flash")
-st.subheader("🧪 Gemini Test")
-
-if os.getenv("GEMINI_API_KEY") is None:
-    st.error("❌ Gemini API key not found. Check Streamlit Secrets.")
-else:
-    st.success("✅ Gemini API key detected")
-    st.write(ai_explain("Say hello in one sentence"))
 
 # =========================
 # AI EXPLANATION FUNCTION
@@ -34,20 +33,15 @@ def ai_explain(prompt):
     try:
         response = model.generate_content(prompt)
         return response.text
-    except Exception as e:
+    except Exception:
         return "⚠️ AI explanation temporarily unavailable."
-        
-st.write(ai_explain("Say hello in one line"))
-st.subheader("🧪 Gemini Test")
-st.write(ai_explain("Say hello to a beginner investor in one line"))
 
 # =========================
-# PAGE CONFIG
+# GEMINI TEST (AFTER FUNCTION)
 # =========================
-st.set_page_config(
-    page_title="AI Investment Analyst",
-    layout="wide"
-)
+st.subheader("🧪 Gemini Test")
+st.success("✅ Gemini API key detected")
+st.write(ai_explain("Say hello to a beginner investor in one line."))
 
 # =========================
 # HEADER
@@ -62,7 +56,7 @@ if "profile_created" not in st.session_state:
     st.session_state.profile_created = False
 
 # =========================
-# INVESTOR PROFILE (ONCE)
+# INVESTOR PROFILE
 # =========================
 st.header("👤 Investor Profile")
 
@@ -72,7 +66,6 @@ with st.form("profile_form"):
     income = st.number_input("Monthly Income (₹)", min_value=0)
     savings = st.number_input("Monthly Savings (₹)", min_value=0)
     risk = st.slider("Risk Appetite (%)", 1, 20)
-
     submitted = st.form_submit_button("Save Profile")
 
 if submitted:
@@ -84,7 +77,6 @@ if submitted:
     st.session_state.profile_created = True
     st.success("✅ Profile saved successfully")
 
-# Stop execution until profile is created
 if not st.session_state.profile_created:
     st.stop()
 
@@ -98,17 +90,9 @@ choice = st.radio(
     ["Analyze a Stock", "Portfolio Allocation"]
 )
 
-def ai_explain(prompt):
-    try:
-        response = model.generate_content(prompt)
-        return response.text
-    except Exception:
-        return "⚠️ AI explanation temporarily unavailable."
-
-
-# ============================================================
-# ======================= PHASE 2 =============================
-# ============================================================
+# =========================
+# PHASE 2 – STOCK ANALYSIS
+# =========================
 if choice == "Analyze a Stock":
     st.header("📊 Stock Analysis")
 
@@ -123,21 +107,13 @@ if choice == "Analyze a Stock":
         df = stock.history(period=period, interval=interval)
 
         if df.empty:
-            st.error("No data found. Check symbol.")
+            st.error("No data found.")
             st.stop()
 
         df.reset_index(inplace=True)
 
-        # -------------------------
-        # MOVING AVERAGES
-        # -------------------------
         df["MA20"] = df["Close"].rolling(20).mean()
         df["MA50"] = df["Close"].rolling(50).mean()
-
-        # -------------------------
-        # CANDLESTICK
-        # -------------------------
-        st.subheader("🕯️ Price Action")
 
         fig = go.Figure()
         fig.add_candlestick(
@@ -149,80 +125,51 @@ if choice == "Analyze a Stock":
         )
         fig.add_trace(go.Scatter(x=df["Date"], y=df["MA20"], name="MA20"))
         fig.add_trace(go.Scatter(x=df["Date"], y=df["MA50"], name="MA50"))
-        fig.update_layout(height=500)
         st.plotly_chart(fig, use_container_width=True)
 
         trend = "BULLISH" if df["MA20"].iloc[-1] > df["MA50"].iloc[-1] else "BEARISH"
-        st.success(f"📈 Trend: {trend}")
-        st.caption("Trend based on Moving Average crossover")
 
-        # -------------------------
-        # RSI
-        # -------------------------
         delta = df["Close"].diff()
-        gain = delta.clip(lower=0)
-        loss = -delta.clip(upper=0)
-        rs = gain.rolling(14).mean() / loss.rolling(14).mean()
-        df["RSI"] = 100 - (100 / (1 + rs))
+        rs = delta.clip(lower=0).rolling(14).mean() / (-delta.clip(upper=0).rolling(14).mean())
+        rsi = 100 - (100 / (1 + rs))
+        rsi_val = rsi.iloc[-1]
 
-        rsi_val = df["RSI"].iloc[-1]
-        rsi_signal = "BULLISH" if rsi_val > 50 else "BEARISH"
+        macd = df["Close"].ewm(span=12).mean() - df["Close"].ewm(span=26).mean()
+        signal = macd.ewm(span=9).mean()
+        macd_signal = "BULLISH" if macd.iloc[-1] > signal.iloc[-1] else "BEARISH"
 
-        st.subheader("📉 RSI Indicator")
-        st.line_chart(df.set_index("Date")["RSI"])
-        st.write(f"RSI: **{round(rsi_val,2)} → {rsi_signal}**")
-        st.caption("RSI measures momentum strength")
-
-        # -------------------------
-        # MACD
-        # -------------------------
-        ema12 = df["Close"].ewm(span=12, adjust=False).mean()
-        ema26 = df["Close"].ewm(span=26, adjust=False).mean()
-        df["MACD"] = ema12 - ema26
-        df["Signal"] = df["MACD"].ewm(span=9, adjust=False).mean()
-
-        macd_signal = "BULLISH" if df["MACD"].iloc[-1] > df["Signal"].iloc[-1] else "BEARISH"
-
-        st.subheader("📊 MACD Indicator")
-        st.line_chart(df.set_index("Date")[["MACD", "Signal"]])
-        st.write(f"MACD Signal: **{macd_signal}**")
-        st.caption("MACD confirms trend direction")
-
-       
-        # 🔑 SAVE FOR PHASE 4 (FIXED)
-        # st.session_state.trend = trend
-        # st.session_state.rsi_value = rsi_val
-        # st.session_state.macd_signal = macd_signal
-        # st.session_state.stock_analyzed = True
         st.session_state.trend = trend
         st.session_state.rsi_value = rsi_val
         st.session_state.macd_signal = macd_signal
         st.session_state.symbol = symbol
         st.session_state.stock_analyzed = True
 
+        st.success(f"📈 Trend: {trend}")
+        st.write(f"RSI: {round(rsi_val,2)}")
+        st.write(f"MACD Signal: {macd_signal}")
+
+        st.subheader("🤖 AI Explanation")
+        st.write(ai_explain(f"""
+        Stock: {symbol}
+        Trend: {trend}
+        RSI: {rsi_val}
+        MACD: {macd_signal}
+
+        Explain recommendation in simple terms.
+        """))
+
+# =========================
+# PORTFOLIO (PHASE 3)
+# =========================
+else:
+    st.header("💼 Portfolio Allocation")
+    st.info("Portfolio logic works independently of stock analysis.")
 
 
-        # -------------------------
-        # FUNDAMENTAL ANALYSIS
-        # -------------------------
-        st.header("🏦 Fundamental Analysis")
 
-        try:
-            info = stock.get_info()
-            st.write("**Sector:**", info.get("sector", "N/A"))
-            st.write("**P/E Ratio:**", info.get("trailingPE", "N/A"))
-            st.write("**EPS:**", info.get("trailingEps", "N/A"))
-            st.write("**Market Cap:**", info.get("marketCap", "N/A"))
 
-            st.info(
-                "📌 Fundamental data is fetched from **Yahoo Finance free API**. "
-                "It includes valuation, profitability, and size metrics."
-            )
-        except:
-            st.warning(
-                "⚠️ Fundamental data temporarily unavailable due to free API limits.\n"
-                "Technical analysis remains unaffected."
-            )
+
+
 
 # ============================================================
 # ======================= PHASE 3 =============================
