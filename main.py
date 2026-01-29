@@ -12,7 +12,20 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 #model = genai.GenerativeModel("gemini-pro")
 model = genai.GenerativeModel("models/gemini-1.5-flash")
 
+# =========================
+# AI EXPLANATION FUNCTION
+# =========================
+def ai_explain(prompt):
+    try:
+        response = model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        return "⚠️ AI explanation temporarily unavailable."
+        
 st.write(ai_explain("Say hello in one line"))
+st.subheader("🧪 Gemini Test")
+st.write(ai_explain("Say hello to a beginner investor in one line"))
+
 # =========================
 # PAGE CONFIG
 # =========================
