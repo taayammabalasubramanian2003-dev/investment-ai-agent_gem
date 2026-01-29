@@ -4,6 +4,14 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 
+#GEMINI SETUP
+import google.generativeai as genai
+import os
+
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+model = genai.GenerativeModel("gemini-pro")
+
+
 # =========================
 # PAGE CONFIG
 # =========================
@@ -60,6 +68,14 @@ choice = st.radio(
     "What do you want to do?",
     ["Analyze a Stock", "Portfolio Allocation"]
 )
+
+def ai_explain(prompt):
+    try:
+        response = model.generate_content(prompt)
+        return response.text
+    except Exception:
+        return "⚠️ AI explanation temporarily unavailable."
+
 
 # ============================================================
 # ======================= PHASE 2 =============================
@@ -145,9 +161,14 @@ if choice == "Analyze a Stock":
 
        
         # 🔑 SAVE FOR PHASE 4 (FIXED)
+        # st.session_state.trend = trend
+        # st.session_state.rsi_value = rsi_val
+        # st.session_state.macd_signal = macd_signal
+        # st.session_state.stock_analyzed = True
         st.session_state.trend = trend
         st.session_state.rsi_value = rsi_val
         st.session_state.macd_signal = macd_signal
+        st.session_state.symbol = symbol
         st.session_state.stock_analyzed = True
 
 
@@ -286,7 +307,8 @@ st.caption("✅ Phase 2 & Phase 3 complete – Transparent AI Investment Agent")
 # ============================================================
 
 # Phase 4 should run ONLY if stock was analyzed
-if choice == "Analyze a Stock":
+#if choice == "Analyze a Stock":
+if choice == "Analyze a Stock" and st.session_state.get("stock_analyzed", False):
 
     st.divider()
     st.header("🧠 Phase 4: AI Decision Agent")
@@ -341,16 +363,35 @@ if choice == "Analyze a Stock":
     for r in reasons:
         st.write("•", r)
 
+        explanation = ai_explain(f"""
+    Stock: {st.session_state.symbol}
+    Trend: {trend}
+    RSI: {rsi_value}
+    MACD: {macd_signal}
+    
+    Explain in simple words whether user should BUY, HOLD, WAIT or SELL.
+    """)
+
+    st.subheader("🤖 AI Reasoning (Why this decision?)")
+    st.write(explanation)
+
+
+    
     # -------------------------
     # EDUCATOR SECTION
     # -------------------------
     st.subheader("🎓 Indicator Explanation")
 
-    with st.expander("📘 What do these indicators mean?"):
-        st.write("**RSI**: Measures buying vs selling pressure.")
-        st.write("**MACD**: Confirms trend strength and direction.")
-        st.write("**Moving Averages**: Show overall price direction.")
-        st.write("**Candlestick Charts**: Show market psychology.")
+   # with st.expander("📘 What do these indicators mean?"):
+    #    st.write("**RSI**: Measures buying vs selling pressure.")
+     #   st.write("**MACD**: Confirms trend strength and direction.")
+      #  st.write("**Moving Averages**: Show overall price direction.")
+       # st.write("**Candlestick Charts**: Show market psychology.")
+    with st.expander("📘 Learn these indicators"):
+        st.write(ai_explain("""
+        Explain RSI, MACD, Moving Averages and Candlestick charts
+        in simple beginner-friendly language.
+        """))
 
     # -------------------------
     # FINANCIAL PLANNING (WITH CHART)
@@ -388,9 +429,17 @@ if choice == "Analyze a Stock":
         "Investment Value": values
     })
 
+    st.write(ai_explain(f"""
+    User invests ₹{monthly} monthly for {years} years.
+    Explain SIP, compounding, and why long-term equity returns average ~12%.
+    """))
     st.line_chart(chart_df.set_index("Month"))
 
     st.caption(
         "Assumes 12% annual return • Monthly SIP • Power of compounding"
     )
+    st.subheader("🧠 How this money grows")
+
+
+
 
