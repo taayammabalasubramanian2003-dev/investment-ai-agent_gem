@@ -7,6 +7,14 @@ import plotly.graph_objects as go
 #GEMINI SETUP
 import google.generativeai as genai
 import os
+api_key = os.getenv("GEMINI_API_KEY")
+
+if not api_key:
+    st.error("❌ Gemini API key not found. Please check Streamlit Secrets.")
+    st.stop()
+
+genai.configure(api_key=api_key)
+model = genai.GenerativeModel("models/gemini-pro")
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 #model = genai.GenerativeModel("gemini-pro")
