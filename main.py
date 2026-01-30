@@ -1,13 +1,18 @@
+import streamlit as st 
+import google.generativeai as genai 
+import os
+import streamlit as st 
+import yfinance as yf 
+import pandas as pd 
+import numpy as np 
+import plotly.graph_objects as go
+
 import streamlit as st
 import google.generativeai as genai
 import os
-import streamlit as st
-import yfinance as yf
-import pandas as pd
-import numpy as np
-import plotly.graph_objects as go
+
 # =========================
-# GEMINI SETUP
+# GEMINI SETUP (CORRECT)
 # =========================
 api_key = os.getenv("GEMINI_API_KEY")
 
@@ -16,7 +21,9 @@ if not api_key:
     st.stop()
 
 genai.configure(api_key=api_key)
-model = genai.GenerativeModel("models/gemini-1.5-flash")
+
+# ✅ WORKING MODEL FOR YOUR KEY
+model = genai.GenerativeModel("models/gemini-2.5-flash")
 
 # =========================
 # AI EXPLANATION FUNCTION
@@ -25,15 +32,20 @@ def ai_explain(prompt):
     try:
         response = model.generate_content(prompt)
         return response.text
-    except Exception:
-        return "⚠️ AI explanation temporarily unavailable."
+    except Exception as e:
+        return f"⚠️ AI Error: {e}"
 
 # =========================
 # GEMINI TEST
 # =========================
 st.subheader("🧪 Gemini Test")
 st.success("✅ Gemini API key detected")
-st.write(ai_explain("Say hello to a beginner investor in one line"))
+
+st.write(
+    ai_explain(
+        "Explain stock investing to a beginner in one simple line."
+    )
+)
 
 
 # =========================
